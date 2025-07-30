@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import firebase from './firebase';
 import axios from 'axios';
-import Auth from './Auth'; // Make sure this import is present
+import Auth from './Auth'; 
+import './App.css';
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [user, setUser] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     // Authentication state observer
@@ -59,6 +61,10 @@ function App() {
       });
   };
 
+  const toggleChat = () => {
+    setIsChatOpen(prev => !prev);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevent default form submission behavior
     if (input.trim() === '') {
@@ -104,36 +110,64 @@ function App() {
 
   // If no user is logged in, show the Auth component
   if (!user) {
-    return <Auth />;
+    return (
+      <div className="website-container">
+        <Auth />
+      </div>
+    );
   }
 
   // If a user is logged in, show the chat interface
   return (
-    <div className="App">
-      <div className="header">
-        <h1>Chatbot</h1>
+    <div className="website-container">
+      {/* Main website content */}
+      <div className="website-content">
+        <h1>Welcome to Our Product Showcase!</h1>
+        <p>This is a simulated website where you can learn about our amazing products. Click the chat icon to talk to our AI assistant!</p>
+        <p>Our AI can answer questions about product features, pricing, availability, and more (once integrated with your mock product API).</p>
+        <p>Feel free to explore and then open the chatbot for a real-time conversation.</p>
         <button onClick={signOut} className="sign-out-button">Sign Out</button>
       </div>
-      <div className="chat-window">
-        {messages.length === 0 ? (
-          <div className="no-messages">Start a conversation!</div>
-        ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.user === 'User' ? 'user-message' : 'bot-message'}`}>
-              <p>{msg.text}</p>
-            </div>
-          ))
-        )}
+
+      {/* Chatbot toggle button */}
+      <button 
+        className="open-chatbot-button" 
+        onClick={toggleChat}
+        aria-label={isChatOpen ? "Close Chatbot" : "Open Chatbot"}
+      >
+        {isChatOpen ? '✕' : '💬'} {/* X for close, speech bubble for open */}
+      </button>
+
+      {/* Chatbot Container (Modal-like appearance) */}
+      <div className={`chatbot-container ${isChatOpen ? 'open' : ''}`}>
+        <div className="chatbot-header">
+          <h1>AI Assistant</h1>
+          <button onClick={toggleChat} className="close-chatbot-button" aria-label="Close Chat">✕</button>
+        </div>
+        <div className="chat-window">
+          {messages.length === 0 ? (
+            <div className="no-messages">Start a conversation!</div>
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} className={`message ${msg.user === 'User' ? 'user-message' : 'bot-message'}`}>
+                <p>{msg.text}</p>
+              </div>
+            ))
+          )}
+          {/* Scroll to bottom */}
+          <div ref={el => { if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
+        </div>
+        <form onSubmit={handleSubmit} className="message-input-form">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            className="message-input"
+            disabled={!user} // Disable input if no user for some reason
+          />
+          <button type="submit" className="send-button" disabled={!user || input.trim() === ''}>Send</button>
+        </form>
       </div>
-      <form onSubmit={handleSubmit} className="message-input-form">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="message-input"
-        />
-        <button type="submit" className="send-button">Send</button>
-      </form>
     </div>
   );
 }
