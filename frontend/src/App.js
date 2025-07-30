@@ -87,7 +87,7 @@ function App() {
       });
 
     // Send message to backend for AI processing
-    axios.post('/api/message', { text: input, userId: user.uid })
+    axios.post('http://127.0.0.1:5000/api/message', { text: input, userId: user.uid })
       .then(response => {
         console.log("Backend response:", response.data);
         // The bot's reply will be fetched via the fetchMessages listener
