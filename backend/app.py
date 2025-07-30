@@ -30,6 +30,7 @@ from flask_cors import CORS
 import openai
 from openai import OpenAIError
 
+
 app = Flask(__name__)
 CORS(app)
 
