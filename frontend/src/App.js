@@ -9,6 +9,7 @@ function App() {
   const [input, setInput] = useState('');
   const [user, setUser] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isBotTyping, setIsBotTyping] = useState(false);
 
   useEffect(() => {
     // Authentication state observer
@@ -87,10 +88,15 @@ function App() {
     messagesRef.push(message)
       .then(() => {
         console.log("User message pushed to Firebase.");
+        setIsBotTyping(false);
       })
       .catch((error) => {
         console.error("Error pushing user message to Firebase:", error.message);
+        setIsBotTyping(false);
       });
+
+      setIsBotTyping(true);
+
 
     // Send message to backend for AI processing
     axios.post('http://127.0.0.1:5000/api/message', { text: input, userId: user.uid })
@@ -153,6 +159,12 @@ function App() {
                 <p>{msg.text}</p>
               </div>
             ))
+          )}
+
+          {isBotTyping && (
+            <div className="message bot-message typing-indicator">
+              <div className="dot-flashing"></div>
+            </div>
           )}
           {/* Scroll to bottom */}
           <div ref={el => { if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
